@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.CustomervisitMapper" >
+  <resultMap id="BaseResultMap" type="com.model.Customervisit" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="cusid" property="cusid" jdbcType="INTEGER" />
+    <result column="empid" property="empid" jdbcType="INTEGER" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="date" property="date" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, cusid, empid, content, date
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from customervisit
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from customervisit
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.model.Customervisit" >
+    insert into customervisit (cusid, empid, content, date) values (#{cusid}, #{empid}, #{content}, #{date})
+  </insert>
+  <insert id="insertSelective" parameterType="com.model.Customervisit" >
+    insert into customervisit
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="cusid != null" >
+        cusid,
+      </if>
+      <if test="empid != null" >
+        empid,
+      </if>
+      <if test="content != null" >
+        content,
+      </if>
+      <if test="date != null" >
+        date,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="cusid != null" >
+        #{cusid,jdbcType=INTEGER},
+      </if>
+      <if test="empid != null" >
+        #{empid,jdbcType=INTEGER},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="date != null" >
+        #{date,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.model.Customervisit" >
+    update customervisit
+    <set >
+      <if test="cusid != null" >
+        cusid = #{cusid,jdbcType=INTEGER},
+      </if>
+      <if test="empid != null" >
+        empid = #{empid,jdbcType=INTEGER},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="date != null" >
+        date = #{date,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.model.Customervisit" >
+    update customervisit set content = #{content},date = #{date} where id = #{id}
+  </update>
+
+  <select id="listCusVisit" resultType="com.model.Customervisit">
+        SELECT cv.*,c.cusname,e.username from customer c,customervisit cv,employees e WHERE cv.cusid=c.cusid AND cv.empid=e.empid
+  </select>
+
+  <select id="listCusVisitByEmpid" parameterType="int" resultType="com.model.Customervisit">
+    SELECT cv.*,c.cusname,e.username from customer c,customervisit cv,employees e WHERE cv.cusid=c.cusid AND cv.empid=e.empid AND cv.empid=#{empid}
+UNION
+SELECT cv.*,c.cusname,e.username from customer c,customervisit cv,employees e WHERE cv.cusid=c.cusid AND cv.empid=e.empid AND c.empid=#{empid}
+
+  </select>
+
+
+    <update id="updateCusVisit" parameterType="int">
+         update customervisit set empid = 1 where empid = #{empid}
+    </update>
+
+
+</mapper>

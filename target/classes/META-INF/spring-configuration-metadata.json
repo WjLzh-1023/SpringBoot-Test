@@ -1,0 +1,23 @@
+{
+  "groups": [
+    {
+      "name": "data",
+      "type": "com.model.DataProperties",
+      "sourceType": "com.model.DataProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "data.id",
+      "type": "java.lang.Integer",
+      "sourceType": "com.model.DataProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "data.name",
+      "type": "java.lang.String",
+      "sourceType": "com.model.DataProperties"
+    }
+  ],
+  "hints": []
+}

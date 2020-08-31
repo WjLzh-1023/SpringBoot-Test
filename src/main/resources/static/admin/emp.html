@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>员工管理</title>
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="../plugins/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../plugins/adminLTE/css/AdminLTE.css">
+    <link rel="stylesheet" href="../plugins/adminLTE/css/skins/_all-skins.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../plugins/jQuery/jquery-2.2.3.min.js"></script>
+    <script src="../plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../js/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="../js/jqPaginator.min.js"></script>
+    <link rel="stylesheet" href="../js/bootstrap.min.css">
+
+    <script type="text/javascript">
+        var pageNum = 1;
+        var pageCount = 0;
+        var rowCount = 0;
+        var size = 5;
+
+        //此标记用于区分新增还是修改或者删除,0为新增，1为修改
+        var temp_edorad = 0;
+
+        //用于存储登录账户
+        var emp;
+        $(function () {
+            $.get("../subject",{},function (data) {
+                emp = data.emp;
+                list(true);
+            }, "json")
+        })
+
+        //遍历显示
+        function list(isFirst) {
+            //编辑框初始清零
+            clean();
+            //新增与修改标记的重置
+            temp_edorad = 0;
+            $("#tbody").children().remove();
+            $.get("../emp/list", {"pageNum": pageNum, "size": size,"roleid":emp.roleid}, function (data) {
+                pageCount = data.pageCount;
+                rowCount = data.rowCount;
+                $.each(data.emps, function (i, e) {
+                    $("#tbody").append('<tr><td>' + e.empid + '</td><td>' + e.username + '</td><td>' + e.password + '</td><td>' + e.tel + '</td><td>' + e.name + '</td><td>' + e.email + '</td>' +
+                        '<td>' + e.rolelnfo + '</td><td class="text-center"><button type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#editModal" onclick="ed2(this)">修改 </button><button type="button" class="btn bg-olive btn-xs" onclick="del(' + e.empid + ')">' + ' ' + '删除</button></td></tr>');
+                })
+
+                if (isFirst) {
+                    $('#page').jqPaginator({
+                        pageSize: 5,//每一页多少条记录
+                        totalCounts: rowCount,
+                        visiblePages: 10,
+                        currentPage: pageNum,
+
+
+                        first: '<li class="first"><a href="javascript:void(0);">首页</a></li>',
+                        prev: '<li class="prev"><a href="javascript:void(0);">上一页</a></li>',
+                        next: '<li class="next"><a href="javascript:void(0);">下一页</a></li>',
+                        last: '<li class="last"><a href="javascript:void(0);">尾页</a></li>',
+                        page: '<li class="page"><a href="javascript:void(0);">{{page}}</a></li>',
+                        onPageChange: function (num) {
+                            pageNum = num;
+                            list(false);
+                        }
+                    });
+                }
+
+
+            }, "json")
+        }
+
+        //修改回显函数
+        function edit(data) {
+            $("#eempid").val($(data).parent().prev().prev().prev().prev().prev().prev().prev().html());
+            $("#eusername").val($(data).parent().prev().prev().prev().prev().prev().prev().html());
+            $("#epassword").val($(data).parent().prev().prev().prev().prev().prev().html());
+            $("#etel").val($(data).parent().prev().prev().prev().prev().html());
+            $("#ename").val($(data).parent().prev().prev().prev().html());
+            $("#eemail").val($(data).parent().prev().prev().html());
+        }
+
+        //回显重置清空
+        function clean() {
+            $("#eempid").val("0");
+            $("#eusername").val("");
+            $("#epassword").val("");
+            $("#etel").val("");
+            $("#ename").val("");
+            $("#eemail").val("");
+        }
+        
+        
+        //删除
+        function del(empid) {
+            if (confirm("是否删除？")) {
+                $.get("../emp/del", {empid:empid}, function (result) {
+                    if (result){
+                        list(true);
+                    }
+                }, "json");
+            }
+        }
+
+        //新增
+        function add() {
+            var emp;
+            if ( temp_edorad===1){
+                emp = {
+                    empid:$("#eempid").val(),
+                    username: $("#eusername").val(),
+                    password: $("#epassword").val(),
+                    tel: $("#etel").val(),
+                    name: $("#ename").val(),
+                    email: $("#eemail").val(),
+                    roleid: $("#erole").val(),
+                    modify: temp_edorad
+                };
+
+            }
+            if ( temp_edorad===0){
+                emp = {
+                    username: $("#eusername").val(),
+                    password: $("#epassword").val(),
+                    tel: $("#etel").val(),
+                    name: $("#ename").val(),
+                    email: $("#eemail").val(),
+                    roleid: $("#erole").val(),
+                    modify: temp_edorad
+                };
+            }
+
+            $.post("../emp/edit", emp, function (result) {
+                if (result) {
+                    list(true);
+                }
+            }, "json");
+        }
+
+        //新增点击事件，将temp_edorad赋0
+        function ed1() {
+            temp_edorad = 0;
+            clean();
+            $("#eempid").val("自动递增不可输入");
+            if (emp.roleid==2){
+                $("#erole1").hide();
+                $("#erole2").hide();
+            }
+
+        }
+
+        //修改点击事件，将temp_edorad赋1
+        function ed2(data) {
+            temp_edorad = 1;
+            if (emp.roleid==2){
+                $("#erole1").hide();
+                $("#erole2").hide();
+            }
+            //调用修改回显函数
+            edit(data);
+        }
+
+
+    </script>
+
+
+</head>
+<body class="hold-transition skin-red sidebar-mini">
+<!-- .box-body -->
+<div class="box-header with-border">
+    <h3 class="box-title">员工管理</h3>
+</div>
+
+<div class="box-body">
+
+    <!-- 数据表格 -->
+    <div class="table-box">
+
+        <!--工具栏-->
+        <div class="pull-left">
+            <div class="form-group form-inline">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default" title="新建" data-toggle="modal" onclick="ed1()"
+                            data-target="#editModal"><i class="fa fa-file-o"></i> 新建
+                    </button>
+
+                </div>
+            </div>
+        </div>
+        <div class="box-tools pull-right">
+            <div class="has-feedback">
+
+            </div>
+        </div>
+        <!--工具栏/-->
+
+        <!--数据列表-->
+        <table id="dataList" class="table table-bordered table-striped table-hover dataTable">
+            <thead>
+            <tr>
+                <th class="sorting_asc">员工ID</th>
+                <th class="sorting">员工用户名</th>
+                <th class="sorting">登录密码</th>
+                <th class="sorting">电话</th>
+                <th class="sorting">姓名</th>
+                <th class="sorting">邮箱</th>
+                <th class="sorting">级别</th>
+                <th class="text-center">操作</th>
+            </tr>
+            </thead>
+            <tbody id="tbody">
+            <tr>
+                <td>1</td>
+                <td>联想</td>
+                <td>L</td>
+                <td class="text-center">
+                    <button type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#editModal">修改
+                    </button>
+                    <button type="button" class="btn bg-olive btn-xs"> 删除</button>
+                </td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>华为</td>
+                <td>H</td>
+                <td class="text-center">
+                    <button type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#editModal">修改
+                    </button>
+                    <button type="button" class="btn bg-olive btn-xs"> 删除</button>
+                </td>
+            </tr>
+
+            </tbody>
+
+        </table>
+        <!--数据列表/-->
+
+
+    </div>
+    <!-- 数据表格 /-->
+
+
+</div>
+<!-- /.box-body -->
+
+<!-- 编辑窗口 -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h3 id="myModalLabel">员工信息编辑</h3>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered table-striped" width="800px">
+                    <tr>
+                        <td>用户id</td>
+                        <td><input readonly class="form-control" id="eempid" value="0"></td>
+                    </tr>
+                    <tr>
+                        <td>用户名</td>
+                        <td><input class="form-control" placeholder="员工用户名" id="eusername"></td>
+                    </tr>
+                    <tr>
+                        <td>登录密码</td>
+                        <td><input class="form-control" placeholder="登录密码" id="epassword"></td>
+                    </tr>
+                    <tr>
+                        <td>电话</td>
+                        <td><input class="form-control" placeholder="电话" id="etel"></td>
+                    </tr>
+                    <tr>
+                        <td>姓名</td>
+                        <td><input class="form-control" placeholder="姓名" id="ename"></td>
+                    </tr>
+                    <tr>
+                        <td>邮箱</td>
+                        <td><input class="form-control" placeholder="邮箱" id="eemail"></td>
+                    </tr>
+                    <tr>
+                        <td>职位</td>
+                        <td><select class="form-control" id="erole">
+                            <option value="3" id="erole3">员工</option>
+                            <option value="2" id="erole2">经理</option>
+                            <option value="1" id="erole1">管理员</option>
+                        </select></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" data-dismiss="modal" aria-hidden="true" onclick="add()">保存</button>
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--分页插件/-->
+<ul class="pagination" id="page"></ul>
+</body>
+</html>

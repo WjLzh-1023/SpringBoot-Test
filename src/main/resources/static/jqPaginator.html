@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script type="text/javascript" src="js/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="js/jqPaginator.min.js"></script>
+    <link rel="stylesheet" href="js/bootstrap.min.css">
+    <script type="text/javascript">
+        $(function(){
+            $('#page').jqPaginator({
+                pageSize:2,//每一页多少条记录
+                totalCounts:32,
+                visiblePages: 10,
+                currentPage: 1,
+
+
+                first: '<li class="first"><a href="javascript:void(0);">首页</a></li>',
+                prev: '<li class="prev"><a href="javascript:void(0);">上一页</a></li>',
+                next: '<li class="next"><a href="javascript:void(0);">下一页</a></li>',
+                last: '<li class="last"><a href="javascript:void(0);">尾页</a></li>',
+                page: '<li class="page"><a href="javascript:void(0);">{{page}}</a></li>',
+                onPageChange: function (num) {
+                    console.log(num);
+                }
+            });
+
+
+        });
+
+    </script>
+
+</head>
+<body>
+    <h1>Jquery分页插件</h1>
+
+    <ul class="pagination" id="page"></ul>
+
+</body>
+</html>

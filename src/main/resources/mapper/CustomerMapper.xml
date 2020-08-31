@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.CustomerMapper">
+    <resultMap id="BaseResultMap" type="com.model.Customer">
+        <id column="cusid" property="cusid" jdbcType="INTEGER"/>
+        <result column="cusname" property="cusname" jdbcType="VARCHAR"/>
+        <result column="address" property="address" jdbcType="VARCHAR"/>
+        <result column="contact" property="contact" jdbcType="VARCHAR"/>
+        <result column="tel" property="tel" jdbcType="VARCHAR"/>
+        <result column="email" property="email" jdbcType="VARCHAR"/>
+        <result column="empid" property="empid" jdbcType="INTEGER"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    cusid, cusname, address, contact, tel, email, empid
+  </sql>
+
+    <select id="selectAndempname" resultType="com.model.Customer">
+    SELECT c.*,e.username FROM customer c,employees e WHERE c.empid=e.empid
+  </select>
+    <select id="selectAndempnamebyempid" resultType="com.model.Customer" parameterType="int">
+      SELECT c.*,e.username FROM customer c,employees e WHERE c.empid=e.empid AND e.empid=#{empid}
+  </select>
+
+
+    <delete id="delsharebycusid" parameterType="int">
+    DELETE FROM customershare WHERE cusid = #{cusid}
+  </delete>
+
+    <delete id="deleteByPrimaryKey" parameterType="int">
+    delete from customer
+    where cusid = #{cusid}
+  </delete>
+    <insert id="insert" parameterType="com.model.Customer">
+    insert into customer (cusname, address, contact, tel, email, empid)
+    values (#{cusname}, #{address}, #{contact}, #{tel}, #{email}, #{empid})
+  </insert>
+
+    <update id="updateByPrimaryKey" parameterType="com.model.Customer">
+    update customer set cusname = #{cusname}, address = #{address}, contact = #{contact},tel = #{tel}, email = #{email} where cusid = #{cusid}
+  </update>
+
+    <select id="selectAndShare" resultType="com.model.Customer" parameterType="int">
+  SELECT m.*,e.username FROM employees e,(
+SELECT customer.* FROM customer,employees,customershare where customershare.cusid=customer.cusid AND customershare.empid=employees.empid AND employees.empid = #{empid} ) m WHERE e.empid=m.empid
+</select>
+
+    <insert id="insertshare" parameterType="com.model.Customer">
+        insert into customershare (cusid,empid) values (#{cusid},#{empid})
+    </insert>
+
+    <update id="updateCus" parameterType="int">
+         update customer set empid = 1 where empid = #{empid}
+    </update>
+
+    <update id="updateCusShare" parameterType="int">
+         update customershare set empid = 1 where empid = #{empid}
+    </update>
+
+    <select id="all" resultType="com.model.Customer">
+        SELECT em.*,employees.username as shareusername FROM employees,
+(SELECT m.*,e.username FROM employees e,
+(SELECT customer.*,customershare.empid AS shareempid FROM customer,employees,customershare
+where customer.cusid=customershare.cusid AND employees.empid = customershare.empid) m
+WHERE e.empid = m.empid) em
+WHERE  employees.empid=em.shareempid
+    </select>
+
+    <update id="upcuByemp" parameterType="com.model.Customer">
+        update customer set empid = #{empid} where cusid = #{cusid}
+    </update>
+
+</mapper>

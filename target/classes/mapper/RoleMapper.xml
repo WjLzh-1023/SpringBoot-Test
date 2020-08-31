@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.RoleMapper">
+    <resultMap id="BaseResultMap" type="com.model.Role">
+        <id column="roleid" property="roleid" jdbcType="INTEGER"/>
+        <result column="roleName" property="rolename" jdbcType="VARCHAR"/>
+        <result column="rolelnfo" property="rolelnfo" jdbcType="VARCHAR"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    roleid, roleName, rolelnfo
+  </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from role
+        where roleid = #{roleid,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from role
+    where roleid = #{roleid,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="com.model.Role">
+    insert into role (roleid, roleName, rolelnfo
+      )
+    values (#{roleid,jdbcType=INTEGER}, #{rolename,jdbcType=VARCHAR}, #{rolelnfo,jdbcType=VARCHAR}
+      )
+  </insert>
+    <insert id="insertSelective" parameterType="com.model.Role">
+        insert into role
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="roleid != null">
+                roleid,
+            </if>
+            <if test="rolename != null">
+                roleName,
+            </if>
+            <if test="rolelnfo != null">
+                rolelnfo,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="roleid != null">
+                #{roleid,jdbcType=INTEGER},
+            </if>
+            <if test="rolename != null">
+                #{rolename,jdbcType=VARCHAR},
+            </if>
+            <if test="rolelnfo != null">
+                #{rolelnfo,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.model.Role">
+        update role
+        <set>
+            <if test="rolename != null">
+                roleName = #{rolename,jdbcType=VARCHAR},
+            </if>
+            <if test="rolelnfo != null">
+                rolelnfo = #{rolelnfo,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where roleid = #{roleid,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.model.Role">
+    update role
+    set roleName = #{rolename,jdbcType=VARCHAR},
+      rolelnfo = #{rolelnfo,jdbcType=VARCHAR}
+    where roleid = #{roleid,jdbcType=INTEGER}
+  </update>
+
+    <select id="list" resultType="com.model.Role">
+    SELECT rp.*,r.rolelnfo,r.roleName,p.pname,p.pinfo FROM role_perm rp,permission p,role r
+WHERE rp.roleid=r.roleid AND rp.permid=p.id
+  </select>
+
+    <insert id="add" parameterType="com.model.Role">
+        INSERT role_perm(roleid,permid) VALUES(#{roleid},#{permid})
+    </insert>
+
+    <delete id="del" parameterType="com.model.Role">
+DELETE FROM role_perm WHERE role_perm.permid=#{permid} AND role_perm.roleid=#{roleid}
+    </delete>
+
+</mapper>

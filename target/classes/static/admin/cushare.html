@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>共享管理</title>
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="../plugins/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../plugins/adminLTE/css/AdminLTE.css">
+    <link rel="stylesheet" href="../plugins/adminLTE/css/skins/_all-skins.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../plugins/jQuery/jquery-2.2.3.min.js"></script>
+    <script src="../plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../js/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="../js/jqPaginator.min.js"></script>
+    <link rel="stylesheet" href="../js/bootstrap.min.css">
+
+    <script type="text/javascript">
+        var pageNum = 1;
+        var pageCount = 0;
+        var rowCount = 0;
+        var size = 5;
+        //用于存储登录账户
+        var emp;
+
+
+        //入口
+        $(function () {
+            getemp();
+        })
+
+
+        function getemp() {
+            $.get("../subject", {}, function (data) {
+                emp = data.emp;
+                list(true);
+            }, "json")
+        }
+
+        function list(isFirst) {
+            $("#tbody").children().remove();
+
+            $.get("../customershare", {"pageNum": pageNum, "size": size, "empid": emp.empid,"roleid":emp.roleid}, function (result) {
+                pageCount = result.pageCount;
+                rowCount = result.rowCount;
+                if (emp.roleid==3){
+                    $.each(result.customers, function (i, e) {
+                        $("#tbody").append('<tr><td>' + e.cusid + '</td><td>' + e.cusname + '</td><td>' + e.address + '</td><td>' + e.contact + '</td><td>' + e.tel + '</td>' +
+                            '<td>' + e.email + '</td><td>' + e.username + '</td>' +
+                            '<td class="text-center"><button type="button" class="btn bg-olive btn-xs" onclick="dele('+e.cusid+')">删除</button>' +
+                            '<button type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#editModal" onclick="adcv(this)">新增拜访</button></td></tr>');
+                    })
+                }else{
+                    $.each(result.customers, function (i, e) {
+                        $("#tbody").append('<tr><td>' + e.cusid + '</td><td>' + e.cusname + '</td><td>' + e.address + '</td><td>' + e.contact + '</td><td>' + e.tel + '</td>' +
+                            '<td>' + e.email + '</td><td>' + e.username + '('+e.shareusername+')</td>' +
+                            '<td class="text-center"><button type="button" class="btn bg-olive btn-xs" onclick="dele('+e.cusid+')">删除</button>' +
+                            '<button type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#editModal" onclick="adcv(this)">新增拜访</button></td></tr>');
+                    })
+                }
+                if (isFirst) {
+                    $('#page').jqPaginator({
+                        pageSize: 5,//每一页多少条记录
+                        totalCounts: rowCount,
+                        visiblePages: 10,
+                        currentPage: pageNum,
+
+
+                        first: '<li class="first"><a href="javascript:void(0);">首页</a></li>',
+                        prev: '<li class="prev"><a href="javascript:void(0);">上一页</a></li>',
+                        next: '<li class="next"><a href="javascript:void(0);">下一页</a></li>',
+                        last: '<li class="last"><a href="javascript:void(0);">尾页</a></li>',
+                        page: '<li class="page"><a href="javascript:void(0);">{{page}}</a></li>',
+                        onPageChange: function (num) {
+                            pageNum = num;
+                            list(false);
+                        }
+                    });
+                }
+
+            }, "json")
+        }
+
+
+        //删除被共享
+        function dele(cusid) {
+            $.post("../cushare/dele",{cusid:cusid},function (result) {
+                if (result) {
+                    list(true);
+                }
+            },"json")
+        }
+
+
+        //新增拜访回显
+        function adcv(cus) {
+            $("#cvsid").val($(cus).parent().prev().prev().prev().prev().prev().prev().prev().html());
+            $("#cvidname").val($(cus).parent().prev().prev().prev().prev().prev().prev().html());
+        }
+
+        //拜访新增提交
+        function add2() {
+            var cv = {
+                cusid: $("#cvsid").val(),
+                empid: emp.empid,
+                content: $("#cvcontent").val(),
+                date: $("#cvdata").val()
+            };
+            $.post("../cuvisit/add", cv, function (result) {
+                if (result) {
+                    list(true);
+                }
+            }, "json")
+        }
+    </script>
+
+</head>
+<body class="hold-transition skin-red sidebar-mini">
+<!-- .box-body -->
+<div class="box-header with-border">
+    <h3 class="box-title">共享管理</h3>
+</div>
+
+<div class="box-body">
+
+    <!-- 数据表格 -->
+    <div class="table-box">
+
+        <!--工具栏-->
+        <div class="pull-left">
+            <div class="form-group form-inline">
+                <div class="btn-group">
+                </div>
+            </div>
+        </div>
+        <div class="box-tools pull-right">
+            <div class="has-feedback">
+
+            </div>
+        </div>
+        <!--工具栏/-->
+
+        <!--数据列表-->
+        <table id="dataList" class="table table-bordered table-striped table-hover dataTable">
+            <thead>
+            <tr>
+                <th class="sorting_asc">客户ID</th>
+                <th class="sorting">客户姓名</th>
+                <th class="sorting">家庭住址</th>
+                <th class="sorting">访问情况</th>
+                <th class="sorting">电话号码</th>
+                <th class="sorting">邮箱</th>
+                <th class="sorting">所属员工</th>
+                <th class="text-center">操作</th>
+            </tr>
+            </thead>
+            <tbody id="tbody">
+            <tr>
+                <td>1</td>
+                <td>联想</td>
+                <td>L</td>
+                <td class="text-center">
+                    <button type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#editModal">修改
+                    </button>
+                    <button type="button" class="btn bg-olive btn-xs"> 删除</button>
+                </td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>华为</td>
+                <td>H</td>
+                <td class="text-center">
+                    <button type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#editModal">修改
+                    </button>
+                    <button type="button" class="btn bg-olive btn-xs"> 删除</button>
+                </td>
+            </tr>
+
+            </tbody>
+        </table>
+        <!--数据列表/-->
+
+
+    </div>
+    <!-- 数据表格 /-->
+
+
+</div>
+<!-- /.box-body -->
+
+<!-- 编辑窗口 -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h3 id="myModalLabel">新增拜访</h3>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered table-striped" width="800px">
+                    <tr>
+                        <td>客户ID</td>
+                        <td><input id="cvsid" readonly class="form-control" placeholder="客户ID"></td>
+                    </tr>
+                    <tr>
+                        <td>客户姓名</td>
+                        <td><input id="cvidname" readonly class="form-control" placeholder="客户姓名"></td>
+                    </tr>
+                    <tr>
+                        <td>拜访信息</td>
+                        <td><input id="cvcontent" class="form-control" placeholder="拜访信息"></td>
+                    </tr>
+                    <tr>
+                        <td>日期</td>
+                        <td><input id="cvdata" class="form-control" placeholder="格式：yyyy-MM-dd HH:mm:ss"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" data-dismiss="modal" aria-hidden="true" onclick="add2()">保存</button>
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--分页插件/-->
+<ul class="pagination" id="page"></ul>
+</body>
+</html>

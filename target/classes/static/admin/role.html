@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>权限管理</title>
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="../plugins/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../plugins/adminLTE/css/AdminLTE.css">
+    <link rel="stylesheet" href="../plugins/adminLTE/css/skins/_all-skins.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../plugins/jQuery/jquery-2.2.3.min.js"></script>
+    <script src="../plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../js/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="../js/jqPaginator.min.js"></script>
+    <link rel="stylesheet" href="../js/bootstrap.min.css">
+
+
+    <script type="text/javascript">
+        var pageNum = 1;
+        var pageCount = 0;
+        var rowCount = 0;
+        var size = 5;
+
+        var emp;
+        $(function () {
+            $.get("../subject", {}, function (data) {
+                emp = data.emp;
+            }, "json")
+            list(true);
+
+        })
+
+        function list(isFirst) {
+            $("#tbody").children().remove();
+            $.get("../role/list", {
+                "pageNum": pageNum,
+                "size": size
+            }, function (date) {
+                pageCount = date.pageCount;
+                rowCount = date.rowCount;
+                $.each(date.roles, function (i, e) {
+                    $("#tbody").append('<tr><td>' + e.roleid + '</td><td>' + e.rolename + '</td><td>' + e.rolelnfo + '</td>' +
+                        '<td>' + e.permid + '</td><td>' + e.pname + '</td><td>' + e.pinfo + '</td><td><button type="button" class="btn bg-olive btn-xs" onclick="del(this)">删除</button></td></tr>')
+                })
+                if (isFirst) {
+                    $('#page').jqPaginator({
+                        pageSize: 5,//每一页多少条记录
+                        totalCounts: rowCount,
+                        visiblePages: 10,
+                        currentPage: pageNum,
+
+
+                        first: '<li class="first"><a href="javascript:void(0);">首页</a></li>',
+                        prev: '<li class="prev"><a href="javascript:void(0);">上一页</a></li>',
+                        next: '<li class="next"><a href="javascript:void(0);">下一页</a></li>',
+                        last: '<li class="last"><a href="javascript:void(0);">尾页</a></li>',
+                        page: '<li class="page"><a href="javascript:void(0);">{{page}}</a></li>',
+                        onPageChange: function (num) {
+                            pageNum = num;
+                            list(false);
+                        }
+                    });
+                }
+            })
+        }
+
+        function pass() {
+            $.get("../emp/password", {}, function () {
+            }, "json")
+        }
+
+        function del(d) {
+            if (confirm("是否删除？")) {
+                let a = $(d).parent().prev().prev().prev().prev().prev().prev().html();
+                let b = $(d).parent().prev().prev().prev().html();
+                $.post("../role/del", {roleid: a, permid: b}, function (re) {
+                    if (result) {
+                        list(true);
+                    }
+                }, "json");
+            }
+        }
+
+
+        function add() {
+            $.post("../role/add", {roleid: $("#roleid").val(), permid: $("#roleinfo").val()}, function (result) {
+                ``
+                if (result) {
+                    list(true);
+                }
+            }, "json");
+
+        }
+
+    </script>
+
+</head>
+<body class="hold-transition skin-red sidebar-mini">
+<!-- .box-body -->
+<div class="box-header with-border">
+    <h3 class="box-title">权限管理</h3>
+</div>
+
+<div class="box-body">
+
+    <!-- 数据表格 -->
+    <div class="table-box">
+
+        <!--工具栏-->
+        <div class="pull-left">
+            <div class="form-group form-inline">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default" title="新建" data-toggle="modal"
+                            data-target="#editModal"><i class="fa fa-file-o"></i> 新建
+                    </button>
+                    <button type="button" class="btn btn-default" title="重置密码" data-toggle="modal" onclick="pass()"><i
+                            class="fa fa-file-o"></i> 重置密码
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="box-tools pull-right">
+            <div class="has-feedback">
+
+            </div>
+        </div>
+        <!--工具栏/-->
+
+        <!--数据列表-->
+        <table id="dataList" class="table table-bordered table-striped table-hover dataTable">
+            <thead>
+            <tr>
+                <th class="sorting_asc">角色ID</th>
+                <th class="sorting">角色名称</th>
+                <th class="sorting">角色类型</th>
+                <th class="sorting">权限ID</th>
+                <th class="sorting">权限名称</th>
+                <th class="sorting">权限类型</th>
+                <th class="text-center">操作</th>
+            </tr>
+            </thead>
+            <tbody id="tbody">
+            <tr>
+                <td>1</td>
+                <td>联想</td>
+                <td>L</td>
+                <td class="text-center">
+                    <button type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#editModal">修改
+                    </button>
+                    <button type="button" class="btn bg-olive btn-xs"> 删除</button>
+                </td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>华为</td>
+                <td>H</td>
+                <td class="text-center">
+                    <button type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#editModal">修改
+                    </button>
+                    <button type="button" class="btn bg-olive btn-xs"> 删除</button>
+                </td>
+            </tr>
+
+            </tbody>
+        </table>
+        <!--数据列表/-->
+
+
+    </div>
+    <!-- 数据表格 /-->
+
+
+</div>
+<!-- /.box-body -->
+
+<!-- 编辑窗口 -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h3 id="myModalLabel">权限赋予</h3>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered table-striped" width="800px">
+                    <tr>
+                        <td>被赋予角色</td>
+                        <td><select class="form-control" id="roleid">
+                            <option value="1">管理员</option>
+                            <option value="2">经理</option>
+                            <option value="3">员工</option>
+                        </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>权限</td>
+                        <td><select class="form-control" id="roleinfo">
+                            <option value="1">用户管理</option>
+                            <option value="2">查询</option>
+                            <option value="3">新增</option>
+                            <option value="4">修改</option>
+                            <option value="5">删除</option>
+                        </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" data-dismiss="modal" aria-hidden="true" onclick="add()">保存</button>
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--分页插件/-->
+<ul class="pagination" id="page"></ul>
+</body>
+</html>
